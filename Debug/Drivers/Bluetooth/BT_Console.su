@@ -1,0 +1,3 @@
+../Drivers/Bluetooth/BT_Console.c:15:9:ParseCmdModeMsg	16	static
+../Drivers/Bluetooth/BT_Console.c:83:9:BTConsole_WriteCMD	24	static
+../Drivers/Bluetooth/BT_Console.c:153:5:BT_SetupDevice	16	static

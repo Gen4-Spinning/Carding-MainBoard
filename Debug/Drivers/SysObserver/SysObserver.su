@@ -1,0 +1,7 @@
+../Drivers/SysObserver/SysObserver.c:14:9:SO_CheckLiftRelativeError	24	static
+../Drivers/SysObserver/SysObserver.c:24:6:SO_Start_LiftRelativeError_Delay	8	static
+../Drivers/SysObserver/SysObserver.c:29:6:SO_Reset_InitialLiftPosRecieved	16	static
+../Drivers/SysObserver/SysObserver.c:34:6:SO_enableCANObservers	32	static
+../Drivers/SysObserver/SysObserver.c:46:6:SO_disableAndResetCANObservers	24	static
+../Drivers/SysObserver/SysObserver.c:54:6:SO_incrementCANCounter	16	static
+../Drivers/SysObserver/SysObserver.c:58:9:SO_checkCanObservers	24	static

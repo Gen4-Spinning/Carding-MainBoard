@@ -1,0 +1,4 @@
+../Drivers/MachineSettings/machineEepromFns.c:12:6:ReadMachineSettingsFromEeprom	16	static
+../Drivers/MachineSettings/machineEepromFns.c:25:9:WriteMachineSettingsIntoEeprom	24	static
+../Drivers/MachineSettings/machineEepromFns.c:53:9:CheckMachineSettings	16	static
+../Drivers/MachineSettings/machineEepromFns.c:91:6:LoadDefaultMachineSettings	16	static

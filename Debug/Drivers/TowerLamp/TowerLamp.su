@@ -1,0 +1,3 @@
+../Drivers/TowerLamp/TowerLamp.c:10:6:TowerLamp_SetState	24	static
+../Drivers/TowerLamp/TowerLamp.c:28:6:TowerLamp_ApplyState	16	static
+../Drivers/TowerLamp/TowerLamp.c:34:6:TowerLamp_NegateState	24	static

@@ -1,0 +1,3 @@
+../Drivers/MotorComms/MotorComms.c:15:6:ReadySetupCommand_AllMotors	24	static
+../Drivers/MotorComms/MotorComms.c:34:10:SendCommands_To_MultipleMotors	104	static
+../Drivers/MotorComms/MotorComms.c:173:10:Send_DiagCommands_To_MultipleMotors	48	static

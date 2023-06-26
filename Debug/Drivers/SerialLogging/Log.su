@@ -1,0 +1,10 @@
+../Drivers/SerialLogging/Log.c:10:9:LOG_checkNewData	24	static
+../Drivers/SerialLogging/Log.c:17:9:Log_addDataToBuffer	104	static
+../Drivers/SerialLogging/Log.c:22:9:Log_addSettingsDataToBuffer	112	static
+../Drivers/SerialLogging/Log.c:28:9:Log_StateChangeDataToBuffer	32	static
+../Drivers/SerialLogging/Log.c:34:9:Log_changeLoggingMotor	24	static
+../Drivers/SerialLogging/Log.c:54:6:Log_setUpLogging	32	static
+../Drivers/SerialLogging/Log.c:65:6:Log_disableLogging	24	static
+../Drivers/SerialLogging/Log.c:74:6:Log_DoOneCycle	8	static
+../Drivers/SerialLogging/Log.c:112:6:Log_ResetRunTimeRdngNos	16	static
+../Drivers/SerialLogging/Log.c:118:6:Log_ResetBufferIndex	16	static

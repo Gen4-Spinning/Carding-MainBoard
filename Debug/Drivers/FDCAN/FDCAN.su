@@ -1,0 +1,3 @@
+../Drivers/FDCAN/FDCAN.c:23:6:FDCAN_TxInit	8	static
+../Drivers/FDCAN/FDCAN.c:41:6:FDCAN_RxFilterInit	40	static
+../Drivers/FDCAN/FDCAN.c:58:10:FDCAN_generateIdentifier	24	static

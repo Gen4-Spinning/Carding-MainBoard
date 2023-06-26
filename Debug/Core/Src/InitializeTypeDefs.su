@@ -1,0 +1,2 @@
+../Core/Src/InitializeTypeDefs.c:12:6:InitializeDiagnostic_TypeDef	16	static
+../Core/Src/InitializeTypeDefs.c:22:6:InitializeRunTime_TypeDef	16	static

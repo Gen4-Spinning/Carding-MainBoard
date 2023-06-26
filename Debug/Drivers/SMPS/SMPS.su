@@ -1,0 +1,2 @@
+../Drivers/SMPS/SMPS.c:9:6:SMPS_TurnOn	8	static
+../Drivers/SMPS/SMPS.c:15:6:SMPS_TurnOff	8	static
