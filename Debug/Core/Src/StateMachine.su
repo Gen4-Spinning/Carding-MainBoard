@@ -1,3 +1,0 @@
-../Core/Src/StateMachine.c:14:6:InitializeState_TypeDef	16	static
-../Core/Src/StateMachine.c:34:6:ChangeState	16	static
-../Core/Src/StateMachine.c:40:7:ResetHomingState	16	static

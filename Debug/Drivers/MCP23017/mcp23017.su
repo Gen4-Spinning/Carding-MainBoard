@@ -1,4 +1,0 @@
-../Drivers/MCP23017/mcp23017.c:33:6:mcp23017_setupForMainBoard	24	static
-../Drivers/MCP23017/mcp23017.c:71:6:mcp23017_init	24	static
-../Drivers/MCP23017/mcp23017.c:77:19:mcp23017_read	40	static
-../Drivers/MCP23017/mcp23017.c:84:19:mcp23017_write	40	static

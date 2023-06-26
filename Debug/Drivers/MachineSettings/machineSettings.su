@@ -1,4 +1,0 @@
-../Drivers/MachineSettings/machineSettings.c:10:6:InitializeMachineSettings	16	static
-../Drivers/MachineSettings/machineSettings.c:21:6:CalculateMachineParameters	24	static
-../Drivers/MachineSettings/machineSettings.c:35:9:getMotorCANAddress	16	static
-../Drivers/MachineSettings/machineSettings.c:53:9:GetMotorID_from_CANAddress	16	static

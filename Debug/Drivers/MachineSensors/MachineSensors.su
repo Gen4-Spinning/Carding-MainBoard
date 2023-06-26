@@ -1,4 +1,0 @@
-../Drivers/MachineSensors/MachineSensors.c:11:9:Sensor_whichTriggered	16	static
-../Drivers/MachineSensors/MachineSensors.c:21:6:Sensor_resetTriggeredStates	16	static
-../Drivers/MachineSensors/MachineSensors.c:25:8:Sensor_GetTriggerValue	24	static
-../Drivers/MachineSensors/MachineSensors.c:34:6:SetCoilerSensorState	16	static

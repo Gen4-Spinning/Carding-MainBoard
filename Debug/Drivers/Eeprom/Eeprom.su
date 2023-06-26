@@ -1,6 +1,0 @@
-../Drivers/Eeprom/Eeprom.c:17:9:EE_WriteInteger	40	static
-../Drivers/Eeprom/Eeprom.c:30:10:EE_ReadInteger	40	static
-../Drivers/Eeprom/Eeprom.c:39:6:float2Bytes	24	static
-../Drivers/Eeprom/Eeprom.c:51:7:bytes2Float	24	static
-../Drivers/Eeprom/Eeprom.c:64:9:EE_WriteFloat	40	static
-../Drivers/Eeprom/Eeprom.c:75:7:EE_ReadFloat	40	static

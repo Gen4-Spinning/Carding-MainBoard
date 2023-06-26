@@ -1,5 +1,0 @@
-../Drivers/MachineErrors/MachineErrors.c:10:6:InitializeMotherBoardErrors_TypeDef	16	static
-../Drivers/MachineErrors/MachineErrors.c:17:6:InitializeMachineErrors_TypeDef	16	static
-../Drivers/MachineErrors/MachineErrors.c:21:10:FindTopMotorError	24	static
-../Drivers/MachineErrors/MachineErrors.c:31:6:ME_addErrors	24	static
-../Drivers/MachineErrors/MachineErrors.c:47:6:SetBTErrors	24	static

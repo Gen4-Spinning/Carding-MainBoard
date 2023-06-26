@@ -1,7 +1,0 @@
-../Drivers/Bluetooth/BT_Machine.c:11:9:BT_MC_generateSettingsMsg	32	static
-../Drivers/Bluetooth/BT_Machine.c:63:9:BT_MC_parse_Settings	40	static
-../Drivers/Bluetooth/BT_Machine.c:121:9:BT_MC_Save_Settings	16	static
-../Drivers/Bluetooth/BT_Machine.c:139:9:BT_MC_Update_Settings	4	static
-../Drivers/Bluetooth/BT_Machine.c:153:9:GetMotorID_from_BTMotor_ID	16	static
-../Drivers/Bluetooth/BT_Machine.c:170:9:GetBTMotorID_from_Motor_ID	16	static
-../Drivers/Bluetooth/BT_Machine.c:187:9:GetMotorId_from_CarousalID	16	static

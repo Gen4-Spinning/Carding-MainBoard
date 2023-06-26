@@ -1,2 +1,0 @@
-../Core/Src/Ack.c:12:6:reset_ACKs	4	static
-../Core/Src/Ack.c:21:6:ACK_startCheck	16	static
