@@ -29,6 +29,7 @@ extern TIM_HandleTypeDef htim17;
 #define ACK_FOR_DIAG_SETUP 7
 #define ACK_FOR_DIAG_START 8
 #define ACK_FOR_DIAG_STOP 9
+#define ACK_FOR_CHANGERPM 10
 
 
 typedef struct ACK_Struct{

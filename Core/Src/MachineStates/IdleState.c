@@ -67,11 +67,9 @@ void IdleState(void){
 
 		if (usrBtns.greenBtn == BTN_PRESSED){
 			usrBtns.greenBtn = BTN_IDLE;
-			if (S.HomingDone){
-				Log_ResetRunTimeRdngNos(); //
-				ChangeState(&S,RUN_STATE);
-				break;
-			}
+			Log_ResetRunTimeRdngNos(); //
+			ChangeState(&S,RUN_STATE);
+			break;
 		}
 
 		//----------- go to other places-------

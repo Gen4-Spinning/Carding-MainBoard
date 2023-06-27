@@ -353,7 +353,7 @@ int main(void)
   ChangeState(&S,IDLE_STATE);
 
   //Setup the Bluetooth device MANUALLY ONLY.
-  BTCmd.manual_setup = 1;
+  //BTCmd.manual_setup = 1;
   if (BTCmd.manual_setup){
 	  BTCmd.manual_setup_result = BT_SetupDevice();
 	  if(BTCmd.manual_setup_result != 1){

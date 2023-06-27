@@ -243,3 +243,40 @@ uint8_t  Send_DiagCommands_To_MultipleMotors(uint8_t *motorList,uint8_t motorArr
 	return 0;
 }
 
+
+uint8_t SendChangeTargetToMultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint8_t *changeTargets){
+	uint8_t noOfMotors = 0;
+	uint16_t targetRampTime = 0;
+	uint16_t motorAcksCheck = 0;
+	uint8_t canID;
+	uint8_t motorAddresses[6]={};
+
+	noOfMotors = motorArraySize;
+
+	for (int i=0;i<noOfMotors;i++){
+		canID = getMotorCANAddress(motorList[i]);
+		motorAddresses[i] = canID;
+		motorAcksCheck |= (1<< (canID-2));
+	}
+
+	reset_ACKs();
+	ACK_startCheck(motorAcksCheck,ACK_FOR_CHANGERPM, NON_CRITICAL_ACK);
+	for (int i=0;i<noOfMotors;i++){
+		canID = motorAddresses[i];
+		targetRampTime = changeTargets[i];
+		FDCAN_sendChangeTarget_ToMotor(canID,targetRampTime,msp.rampTimes);
+	}
+	while(ack.waitingForAckResult){};
+	if (ack.ackResult ==  ACK_FAIL){
+		reset_ACKs();
+		ACK_startCheck(motorAcksCheck,ACK_FOR_CHANGERPM,CRITICAL_ACK);
+		for (int i=0;i<noOfMotors;i++){
+			canID = motorAddresses[i];;
+			FDCAN_sendCommand_ToMotor(canID, EMERGENCY_STOP);
+		}
+		return 0;
+	}
+
+	return 1;
+}
+

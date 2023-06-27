@@ -43,9 +43,10 @@
 #define EMERGENCY_STOP 1 // Emergency Stop
 #define START 2 		// Ramp and start
 #define RAMPDOWN_STOP 3 // RAMP and stop
-#define IDLE 4
+#define CHANGE_RPM 4
 #define HOMING 5
 #define RESUME 6
+
 
 void SetupState(void);
 void DiagnosticsState(void);

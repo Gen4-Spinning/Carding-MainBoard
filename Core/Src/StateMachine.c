@@ -37,9 +37,4 @@ void ChangeState(StateTypeDef *s, uint8_t newState){
 	s->oneTime = 1;
 }
 
- void ResetHomingState(StateTypeDef *s){
-	 s->HomingDone  = 0;
-	 s->HomingDoneCounter = 0;
- }
-
 #endif /* STATEMACHINE_C_ */

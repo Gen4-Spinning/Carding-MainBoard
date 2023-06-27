@@ -40,6 +40,7 @@ void SettingsState(void){
 			 // send success msg to App
 			 HAL_UART_Transmit_IT(&huart1,(uint8_t*)SAVINGSUCCESS,6);
 			 S.BT_transmission_over = 1;
+			 S.settingsModified = 1;
 		 }
 		  S.BT_dataOK = 0;
 	  }else{

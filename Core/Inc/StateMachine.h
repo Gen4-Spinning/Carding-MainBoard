@@ -40,8 +40,7 @@ typedef struct StateStruct
 	char BT_dataOK;
 	char BT_Paired;
 
-	char HomingDoneCounter;
-	char HomingDone;
+	char settingsModified;
 
 	long oneSecTimer;
 	char BT_sendState;
@@ -72,6 +71,5 @@ void FinishState(void);
 
 void InitializeState_TypeDef(StateTypeDef *s);
 void ChangeState(StateTypeDef *s, uint8_t newState);
-void ResetHomingState(StateTypeDef *s);
 
 #endif /* INC_STATEMACHINE_H_ */

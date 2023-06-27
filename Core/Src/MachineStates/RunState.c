@@ -137,6 +137,16 @@ void RunState(void){
 			break;
 		}
 
+		//if settings modified through app for carding
+		if (S.settingsModified == 1){
+			UpdateMachineParameters();
+			uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
+			uint8_t targets[] = {mcParams.cylinderFeedRPM,mcParams.beaterFeedRPM,
+												mcParams.cageRPM,mcParams.coilerRPM};
+			noOfMotors = 4;
+			SendChangeTargetToMultipleMotors(motors,noOfMotors,targets);
+			S.settingsModified = 0;
+		}
 		// TO CHANGE for the carding sensors
 		/*if (sensor.latchedtrunkSensor){
 			//Pause
@@ -178,6 +188,13 @@ void RunState(void){
 			HAL_UART_Transmit_IT(&huart1,(uint8_t*)BufferTransmit,BTpacketSize);
 			S.BT_transmission_over = 0;
 			S.BT_sendState = 0;
+		}
+
+		/*---- go into settings when need be-----*/
+		if (S.switchState == TO_SETTINGS){
+			ChangeState(&S,SETTINGS_STATE);
+			S.switchState = 0;
+			break;
 		}
 
 		//TODO:TO STOP WHEN LENGTH FINISHED

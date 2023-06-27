@@ -23,6 +23,8 @@
 #include "MachineErrors.h"
 #include "BT_Fns.h"
 #include "BT_Machine.h"
+#include "BT_Console.h"
+
 uint8_t doActivity = 0 ;
 
 uint8_t dbg_Start = 0;

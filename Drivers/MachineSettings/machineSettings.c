@@ -16,11 +16,23 @@ void InitializeMachineSettings(machineSettingsTypeDef *ms){
 	ms->beaterFeed = 2.5;
 	ms->trunkDelay = 3;
 	ms->lengthLimit = 1500;
+	ms->rampTimes = 3;
 }
 
 void CalculateMachineParameters(machineSettingsTypeDef *ms,machineParamsTypeDef *m){
 	m->cylinderRPM = ms->cylinderSpeed/CYLINDER_GEAR_RATIO;
 	m->beaterRPM = ms->beaterSpeed/BEATER_GEAR_RATIO;
+	m->cylinderFeedRPM = ms->cylinderFeed * CYLINDER_FEED_GB;
+	m->beaterFeedRPM = ms->beaterFeed * BEATER_FEED_GB;
+	m->cageGB_RPM = (ms->delivery_mMin*1000)/TONGUE_GROOVE_CIRCUMFERENCE_MM;
+	m->cageRPM = m->cageGB_RPM * CAGE_GB;
+	float req_coiler_tongue_surfaceSpeed_mm = (ms->delivery_mMin*1000) * ms->draft;
+	float req_coiler_tongueRPM = req_coiler_tongue_surfaceSpeed_mm/COILER_GROOVE_CIRCUMFERENCE_MM;
+	m->coilerGB_rpm = req_coiler_tongueRPM/COILER_GROOVE_TO_GB_RATIO;
+	m->coilerRPM = m->coilerGB_rpm * COILER_GB;
+}
+
+void UpdateMachineParameters(machineSettingsTypeDef *ms,machineParamsTypeDef *m){
 	m->cylinderFeedRPM = ms->cylinderFeed * CYLINDER_FEED_GB;
 	m->beaterFeedRPM = ms->beaterFeed * BEATER_FEED_GB;
 	m->cageGB_RPM = (ms->delivery_mMin*1000)/TONGUE_GROOVE_CIRCUMFERENCE_MM;
