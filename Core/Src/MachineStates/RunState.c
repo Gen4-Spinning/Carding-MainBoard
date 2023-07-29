@@ -164,6 +164,7 @@ void RunState(void){
 			HAL_Delay(1000); // to hear the beep
 
 			ChangeState(&S,IDLE_STATE);
+			SO_Reset_InitialLiftPosRecieved(&SO);
 			break;
 		}
 

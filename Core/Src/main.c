@@ -48,8 +48,6 @@
 
 #include "MB_LEDs.h"
 
-#include "CAN_MotherBoard.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -197,7 +195,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  S.oneSecTimer++;
 		  timer7Count = 0;
 		  Toggle_State_LEDs(&S);
-
 		  if (sensor.ductTimerIncrementBool){
 			  sensor.ductSensorTimer++;
 		  }

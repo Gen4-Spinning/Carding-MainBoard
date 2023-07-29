@@ -43,7 +43,6 @@ void SO_enableCANObservers(SysObserver *so,uint8_t *motorList,uint8_t noOfMotors
 
 }
 
-
 void SO_disableAndResetCANObservers(SysObserver *so){
 	for (int i=0;i<6;i++){
 		so->CO[i].enable = 0;
