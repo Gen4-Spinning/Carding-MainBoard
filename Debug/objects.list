@@ -10,7 +10,6 @@
 "./Core/Src/MachineStates/DebugState.o"
 "./Core/Src/MachineStates/DiagnosticsState.o"
 "./Core/Src/MachineStates/ErrorState.o"
-"./Core/Src/MachineStates/FinishState.o"
 "./Core/Src/MachineStates/IdleState.o"
 "./Core/Src/MachineStates/RunState.o"
 "./Core/Src/MachineStates/SettingsState.o"

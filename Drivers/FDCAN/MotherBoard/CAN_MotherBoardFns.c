@@ -60,13 +60,13 @@ void FDCAN_SendDiagnostics_ToMotor(uint8_t destination,DiagnosticsTypeDef *d)
 }
 
 
-void FDCAN_sendChangeTarget_ToMotor(uint8_t destination, uint16_t newTarget, uint16_t transitionTime){
+void FDCAN_sendChangeTarget_ToMotor(uint8_t destination, uint16_t newTarget, uint16_t transitionTime_ms){
 	TxHeader.Identifier =(0xA0D<<16)|(destination<<8)|0x01;
 	TxHeader.DataLength = FDCAN_DLC_BYTES_4;
 	TxData[0]=newTarget>>8;
 	TxData[1]=newTarget;
-	TxData[2]=transitionTime>>8;
-	TxData[3]=transitionTime;
+	TxData[2]=transitionTime_ms>>8;
+	TxData[3]=transitionTime_ms;
 	while(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan1)==0){};
 	HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
 }

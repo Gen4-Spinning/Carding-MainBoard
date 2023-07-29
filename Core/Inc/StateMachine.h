@@ -15,10 +15,12 @@
 #define IDLE_RUN 2
 
 
-#define RUN_OPERATING 1
-#define RUN_PAUSED	2
-#define RUN_STOPPED 3
-#define RUN_OVER 4
+#define RUN_RAMPUP 1
+#define RUN_ALL 2
+#define RUN_PIECING 3
+#define RUN_PAUSED	4
+#define RUN_STOPPED 5
+#define RUN_OVER 6
 
 #define TO_SETTINGS 1
 #define TO_DIAGNOSTICS 2

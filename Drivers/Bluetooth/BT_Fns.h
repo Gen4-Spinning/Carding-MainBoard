@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include "Struct.h"
 #include "machineSettings.h"
+#include "MachineSensors.h"
 #include "CommonConstants.h"
 
 #define CONNECTION_MADE 1
@@ -40,7 +41,8 @@
 #define CAROUSAL_INFO 0x07
 #define GBCALIB_CMD_FROM_APP 0x08
 #define GBCALIB_DATA_FROM_MB 0x09
-
+#define RESET_LENGTH_COUNTER_CARDING 0x0A
+#define TOGGLE_LOGGING 0x0C
 //subStates
 #define SUBSTATE_NA 0x99
 #define BT_IDLE 0x00

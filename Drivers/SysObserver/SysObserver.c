@@ -43,12 +43,15 @@ void SO_enableCANObservers(SysObserver *so,uint8_t *motorList,uint8_t noOfMotors
 
 }
 
+
 void SO_disableAndResetCANObservers(SysObserver *so){
 	for (int i=0;i<6;i++){
 		so->CO[i].enable = 0;
 		so->CO[i].canDataCount = 0;
 	}
 	HAL_TIM_Base_Stop_IT(&htim16);
+	__HAL_TIM_SET_COUNTER(&htim16,0);
+	htim16.Instance->SR &= ~TIM_SR_UIF; // Clear pending flag of timer16
 }
 
 void SO_incrementCANCounter(SysObserver *so,uint8_t motorID){

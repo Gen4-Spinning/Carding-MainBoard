@@ -48,6 +48,8 @@
 
 #include "MB_LEDs.h"
 
+#include "CAN_MotherBoard.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,7 +101,6 @@ RunTime_TypeDef R[6]; // always keep this as 6, as max is 6 for carding
 SysObserver SO;
 BTRecvMsg_TypeDef BT;
 BTConsole BTCmd;
-
 
 userBtns usrBtns;
 MCP23017_HandleTypeDef hmcp;
@@ -159,12 +160,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim == &htim16){ // 1 sec timer that checks if the CAN connections are all OK.
 	  SO.canOverallStatus = SO_checkCanObservers(&SO);
-	  if (SO.canOverallStatus != ALL_CANS_HEALTHY){
-		  ME.ErrorFlag = 1;
-		  ME_addErrors(&ME,ERR_SYSTEM_LEVEL_SOURCE,SYS_CAN_CUT_ERROR, SO.canOverallStatus, 0); // maybe later find out which ACK failed.
-		  S.SMPS_switchOff = 1;
-		  //stp the timer if you find you have an error.
-		  HAL_TIM_Base_Stop_IT(&htim16);
+	  if (SO.canOverallStatus != ALL_CANS_HEALTHY ) {
+		  if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
+			  //do Nothing. If someone pulls the CAN out when sensor is closed,motor is stopped, and
+			  //on resume we ll get ACK error so its somewhat handled. Otherwise if u turn off only one
+			  //Can observer, when u resume we need to restart all.(which is also fine)
+		  }else{
+			  ME.ErrorFlag = 1;
+			  ME_addErrors(&ME,ERR_SYSTEM_LEVEL_SOURCE,SYS_CAN_CUT_ERROR, SO.canOverallStatus, 0); // maybe later find out which ACK failed.
+			  S.SMPS_switchOff = 1;
+			  //stp the timer if you find you have an error.
+			  HAL_TIM_Base_Stop_IT(&htim16);
+		  }
 	  }
   }
 
@@ -182,16 +189,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  timer7Count ++;
 	  if (timer7Count % 5 == 0){
 		  S.BT_sendState = 1;
+		  if ((S.runMode== RUN_ALL) || (S.runMode == RUN_PIECING)){
+			  mcParams.currentMtrsRun += msp.delivery_mMin/60.0 * 0.5;
+		  }
 	  }
 	  if (timer7Count == 10){
 		  S.oneSecTimer++;
 		  timer7Count = 0;
 		  Toggle_State_LEDs(&S);
+
+		  if (sensor.ductTimerIncrementBool){
+			  sensor.ductSensorTimer++;
+		  }
 	  }
   }
-
 }
-
 
 uint8_t sensorTrigger;
 uint8_t sensorVal;
@@ -200,12 +212,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 	if (GPIO_Pin == INT_B_Pin){
 		sensorTrigger = Sensor_whichTriggered(&hmcp,&mcp_portB_sensorVal);
-		/*if (sensorTrigger == CREEL_SLIVER_CUT_SENSOR){
-			sensor.creelSensor = Sensor_GetTriggerValue(&hmcp,&mcp_portB_sensorVal,SLIVER_CUT_SENSOR);
-			if(sensor.creelSensor == 1){
-				sensor.latchedCreelSensor = 1;
-			}
-		}*/
+		if (sensorTrigger == DUCT_SENSOR){
+			sensor.ductSensor = Sensor_GetTriggerValue(&hmcp,&mcp_portB_sensorVal,DUCT_SENSOR);
+			// here if there is a change we get a trigger. So if we dont get a trigger value for
+			// trigger seconds, it means the state has not changed for x sec.
+		}
 	}else if (GPIO_Pin == SMPS_OK_IP_Pin){
 		// if the mother board has turned the SMPS on, but the smps is off, we have a problem!
 		S.SMPS_OK_signal = (uint8_t)(HAL_GPIO_ReadPin(SMPS_OK_IP_GPIO_Port, SMPS_OK_IP_Pin));
@@ -366,10 +377,13 @@ int main(void)
   //Start the 1000 msec Timer for checking if the CAN bus is Ok
   HAL_TIM_Base_Start_IT(&htim16);
 
+  //at startup make both duct sensor states, instantaneous and current open
+  sensor.ductCurrentState = DUCT_SENSOR_OPEN;
+  sensor.ductSensor = DUCT_SENSOR_OPEN;
+
   //SMPS - turn on the SMPS, wait a while to see if  short command.
   SMPS_TurnOn();
-  HAL_Delay(3000);//contactor takes a long time to turn on.
-
+  HAL_Delay(1000);//contactor takes a long time to turn on.
   /*uint8_t smps = (uint8_t)(HAL_GPIO_ReadPin(SMPS_OK_IP_GPIO_Port, SMPS_OK_IP_Pin));
   if (smps == SMPS_OFF){
 	  ME.ErrorFlag = 1;
@@ -377,13 +391,10 @@ int main(void)
 	  S.SMPS_switchOff = 1;
   }*/
 
-  S.LOG_enabled = 1;
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
 
   while (1)
   {
@@ -410,10 +421,6 @@ int main(void)
 
 	if (S.current_state == ERROR_STATE){
 		ErrorState();
-	}
-
-	if (S.current_state == FINISHED_STATE){
-			FinishState();
 	}
 
     /* USER CODE END WHILE */
@@ -631,7 +638,7 @@ static void MX_TIM6_Init(void)
 
   /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 1499;
+  htim6.Init.Prescaler = 2999;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim6.Init.Period = 49999;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -952,8 +959,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : YELLOW_Pin GREEN_Pin RED_Pin ROTARY_Pin */
-  GPIO_InitStruct.Pin = YELLOW_Pin|GREEN_Pin|RED_Pin|ROTARY_Pin;
+  /*Configure GPIO pins : GREEN_Pin YELLOW_Pin RED_Pin ROTARY_Pin */
+  GPIO_InitStruct.Pin = GREEN_Pin|YELLOW_Pin|RED_Pin|ROTARY_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);

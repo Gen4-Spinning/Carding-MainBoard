@@ -50,24 +50,25 @@ void IdleState(void){
 			CalculateMachineParameters(&msp,&mcParams);
 			ReadySetupCommand_AllMotors(&msp,&mcParams);
 			//Reset Run machine Parameters
-			mcParams.currentMtrsRun = 0;
+			mcParams.currentMtrsRun = 0.01;
 
 			L.logRunStateChange = 1;
 			L.flushBuffer = 1;
 			S.oneTime  = 0;
 		}
 
-		if (usrBtns.rotarySwitch == ROTARY_SWITCH_ON){
+		/*if (usrBtns.rotarySwitch == ROTARY_SWITCH_ON){
 			SetCoilerSensorState(&sensor,SENSOR_ENABLE);
 		}
 
 		if (usrBtns.rotarySwitch == ROTARY_SWITCH_OFF){
 			SetCoilerSensorState(&sensor,SENSOR_DISABLE);
 		}
+		 */
 
 		if (usrBtns.greenBtn == BTN_PRESSED){
 			usrBtns.greenBtn = BTN_IDLE;
-			Log_ResetRunTimeRdngNos(); //
+			Log_ResetRunTimeRdngNos();
 			ChangeState(&S,RUN_STATE);
 			break;
 		}

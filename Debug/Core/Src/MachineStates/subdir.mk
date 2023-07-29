@@ -8,7 +8,6 @@ C_SRCS += \
 ../Core/Src/MachineStates/DebugState.c \
 ../Core/Src/MachineStates/DiagnosticsState.c \
 ../Core/Src/MachineStates/ErrorState.c \
-../Core/Src/MachineStates/FinishState.c \
 ../Core/Src/MachineStates/IdleState.c \
 ../Core/Src/MachineStates/RunState.c \
 ../Core/Src/MachineStates/SettingsState.c 
@@ -17,7 +16,6 @@ OBJS += \
 ./Core/Src/MachineStates/DebugState.o \
 ./Core/Src/MachineStates/DiagnosticsState.o \
 ./Core/Src/MachineStates/ErrorState.o \
-./Core/Src/MachineStates/FinishState.o \
 ./Core/Src/MachineStates/IdleState.o \
 ./Core/Src/MachineStates/RunState.o \
 ./Core/Src/MachineStates/SettingsState.o 
@@ -26,7 +24,6 @@ C_DEPS += \
 ./Core/Src/MachineStates/DebugState.d \
 ./Core/Src/MachineStates/DiagnosticsState.d \
 ./Core/Src/MachineStates/ErrorState.d \
-./Core/Src/MachineStates/FinishState.d \
 ./Core/Src/MachineStates/IdleState.d \
 ./Core/Src/MachineStates/RunState.d \
 ./Core/Src/MachineStates/SettingsState.d 
@@ -39,7 +36,7 @@ Core/Src/MachineStates/%.o Core/Src/MachineStates/%.su: ../Core/Src/MachineState
 clean: clean-Core-2f-Src-2f-MachineStates
 
 clean-Core-2f-Src-2f-MachineStates:
-	-$(RM) ./Core/Src/MachineStates/DebugState.d ./Core/Src/MachineStates/DebugState.o ./Core/Src/MachineStates/DebugState.su ./Core/Src/MachineStates/DiagnosticsState.d ./Core/Src/MachineStates/DiagnosticsState.o ./Core/Src/MachineStates/DiagnosticsState.su ./Core/Src/MachineStates/ErrorState.d ./Core/Src/MachineStates/ErrorState.o ./Core/Src/MachineStates/ErrorState.su ./Core/Src/MachineStates/FinishState.d ./Core/Src/MachineStates/FinishState.o ./Core/Src/MachineStates/FinishState.su ./Core/Src/MachineStates/IdleState.d ./Core/Src/MachineStates/IdleState.o ./Core/Src/MachineStates/IdleState.su ./Core/Src/MachineStates/RunState.d ./Core/Src/MachineStates/RunState.o ./Core/Src/MachineStates/RunState.su ./Core/Src/MachineStates/SettingsState.d ./Core/Src/MachineStates/SettingsState.o ./Core/Src/MachineStates/SettingsState.su
+	-$(RM) ./Core/Src/MachineStates/DebugState.d ./Core/Src/MachineStates/DebugState.o ./Core/Src/MachineStates/DebugState.su ./Core/Src/MachineStates/DiagnosticsState.d ./Core/Src/MachineStates/DiagnosticsState.o ./Core/Src/MachineStates/DiagnosticsState.su ./Core/Src/MachineStates/ErrorState.d ./Core/Src/MachineStates/ErrorState.o ./Core/Src/MachineStates/ErrorState.su ./Core/Src/MachineStates/IdleState.d ./Core/Src/MachineStates/IdleState.o ./Core/Src/MachineStates/IdleState.su ./Core/Src/MachineStates/RunState.d ./Core/Src/MachineStates/RunState.o ./Core/Src/MachineStates/RunState.su ./Core/Src/MachineStates/SettingsState.d ./Core/Src/MachineStates/SettingsState.o ./Core/Src/MachineStates/SettingsState.su
 
 .PHONY: clean-Core-2f-Src-2f-MachineStates
 

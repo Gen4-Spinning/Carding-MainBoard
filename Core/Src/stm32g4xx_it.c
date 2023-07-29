@@ -228,7 +228,7 @@ void EXTI0_IRQHandler(void)
   /* USER CODE BEGIN EXTI0_IRQn 0 */
 
   /* USER CODE END EXTI0_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(YELLOW_Pin);
+  HAL_GPIO_EXTI_IRQHandler(GREEN_Pin);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
 
   /* USER CODE END EXTI0_IRQn 1 */
@@ -242,7 +242,7 @@ void EXTI1_IRQHandler(void)
   /* USER CODE BEGIN EXTI1_IRQn 0 */
 
   /* USER CODE END EXTI1_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GREEN_Pin);
+  HAL_GPIO_EXTI_IRQHandler(YELLOW_Pin);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
 
   /* USER CODE END EXTI1_IRQn 1 */
@@ -499,6 +499,18 @@ void UART_IDLECallback(void){
 				  if (S.BT_runInfoToSend != RUN_PRODUCTION_DATA){
 					  S.BT_runInfowhichMotor = GetMotorId_from_CarousalID(S.BT_runInfoToSend);
 				  }
+			  }
+			  else if (BT.information == RESET_LENGTH_COUNTER_CARDING){
+				  mcParams.currentMtrsRun = 0;
+				  HAL_UART_Transmit_IT(&huart1,(uint8_t*)SAVINGSUCCESS,6);
+			  }
+			  else if (BT.information == TOGGLE_LOGGING){
+				 if (BT.subState == 1){
+					 S.LOG_enabled = 1;
+				 }else if (BT.subState == 0){
+					 S.LOG_enabled = 0;
+				 }else{}
+				 HAL_UART_Transmit_IT(&huart1,(uint8_t*)SAVINGSUCCESS,6);
 			  }
 			  else{}
 			  BT.BTmsgGood = 0;

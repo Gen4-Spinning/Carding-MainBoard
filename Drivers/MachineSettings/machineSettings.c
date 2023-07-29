@@ -7,6 +7,7 @@
 
 #include "machineSettings.h"
 
+
 void InitializeMachineSettings(machineSettingsTypeDef *ms){
 	ms->delivery_mMin = 6;
 	ms->draft = 1.0;
@@ -78,3 +79,14 @@ uint8_t GetMotorID_from_CANAddress(uint8_t canAddress){
 	}
 	return 6; // return
 }
+
+
+uint8_t CheckCylindersRampUpOver(machineParamsTypeDef *mcp,RunTime_TypeDef *cylinder,RunTime_TypeDef *beater){
+	if (cylinder->presentRPM > (mcp->cylinderRPM - 100)){
+		if (beater->presentRPM > (mcp->beaterRPM - 100)){
+			return 1;
+		}
+	}
+	return 0;
+}
+

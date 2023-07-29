@@ -43,6 +43,7 @@ void RunState(void){
 	uint8_t response = 0;
 	uint8_t noOfMotors = 0;
 	uint8_t BTpacketSize = 0;
+	long currentTime;
 	while(1){
 
 		if (S.oneTime){
@@ -54,10 +55,11 @@ void RunState(void){
 				SO_enableCANObservers(&SO,motors,noOfMotors);
 			}
 
-			S.runMode = RUN_OPERATING;
+			S.runMode = RUN_RAMPUP;
 			mcParams.allMotorsOn = 0;
 
-			Log_setUpLogging(&L,motors,noOfMotors);
+			uint8_t motors1[] = {CARDING_CYLINDER,BEATER_CYLINDER,CARDING_FEED,BEATER_FEED,CAGE,COILER};
+			Log_setUpLogging(&L,motors1,5);
 			Log_ResetBufferIndex(&L);
 			if (S.LOG_enabled){
 				L.bufferIdx += Log_addSettingsDataToBuffer(&msp,L.bufferIdx);
@@ -71,7 +73,30 @@ void RunState(void){
 			S.oneTime = 0;
 		}
 
-		if ((usrBtns.yellowBtn == BTN_PRESSED) && (S.runMode == RUN_OPERATING)){
+		if (S.runMode == RUN_RAMPUP){
+			uint8_t rampOver = CheckCylindersRampUpOver(&mcParams,&R[CARDING_CYLINDER],&R[BEATER_CYLINDER]);
+			if (rampOver == 1){
+				S.runMode = RUN_ALL;
+				mcParams.allMotorsOn = 1;
+				//before we start the other motors we need to stop the can checking
+				SO_disableAndResetCANObservers(&SO);
+
+				uint8_t motors[] = {CARDING_FEED,BEATER_FEED,COILER,CAGE};
+				noOfMotors = 4;
+				response = SendCommands_To_MultipleMotors(motors,noOfMotors,START);
+
+				//TODO - later make it such that once the CAN starts it never needs to stop.
+				// so we will not have this statement.
+				if (response!= 2){
+					uint8_t motors1[] = {CARDING_CYLINDER,BEATER_CYLINDER,CARDING_FEED,BEATER_FEED,CAGE,COILER};
+					noOfMotors = 6;
+					SO_enableCANObservers(&SO,motors1,noOfMotors);
+				}
+				rampOver = 0;
+			}
+		}
+
+		if ((usrBtns.yellowBtn == BTN_PRESSED) && (S.runMode == RUN_ALL)){
 			usrBtns.yellowBtn = BTN_IDLE;
 			//Pause
 			uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
@@ -81,6 +106,8 @@ void RunState(void){
 			TowerLamp_ApplyState(&hmcp,&mcp_portB);
 
 			//TODO - later make it such that once the CAN starts it never needs to stop.
+			// if we disable here, we stop checking the cylinder and beater also.
+			// TODO: fix this.
 			SO_disableAndResetCANObservers(&SO);
 
 			S.runMode = RUN_PAUSED;
@@ -100,20 +127,24 @@ void RunState(void){
 			if (response!= 2){
 				SO_enableCANObservers(&SO,motors,noOfMotors);
 			}
-			S.runMode = RUN_OPERATING;
+			S.runMode = RUN_ALL;
 
 			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_ON,AMBER_OFF);
 			TowerLamp_ApplyState(&hmcp,&mcp_portB);
 			L.logRunStateChange = 1;
 		}
 
-		if ((usrBtns.rotarySwitch == ROTARY_SWITCH_ON) && (sensor.coilerSensor_activated == 0)){
+		if (S.oneSecTimer != currentTime){
+			mcParams.totalPower = R[0].power + R[1].power + R[2].power + R[3].power + R[4].power + R[5].power;
+			currentTime = S.oneSecTimer;
+		}
+		/*if ((usrBtns.rotarySwitch == ROTARY_SWITCH_ON) && (sensor.coilerSensor_activated == 0)){
 			SetCoilerSensorState(&sensor,SENSOR_ENABLE);
 		}
 
 		if ((usrBtns.rotarySwitch == ROTARY_SWITCH_OFF) && (sensor.coilerSensor_activated == 1)){
 			SetCoilerSensorState(&sensor,SENSOR_DISABLE);
-		}
+		}*/
 
 		// stop btn
 		if (usrBtns.redBtn == BTN_PRESSED){
@@ -133,38 +164,35 @@ void RunState(void){
 			HAL_Delay(1000); // to hear the beep
 
 			ChangeState(&S,IDLE_STATE);
-			SO_Reset_InitialLiftPosRecieved(&SO);
 			break;
 		}
 
 		//if settings modified through app for carding
 		if (S.settingsModified == 1){
-			UpdateMachineParameters();
+			UpdateMachineParameters(&msp,&mcParams);
 			uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
-			uint8_t targets[] = {mcParams.cylinderFeedRPM,mcParams.beaterFeedRPM,
+			uint16_t targets[] = {mcParams.cylinderFeedRPM,mcParams.beaterFeedRPM,
 												mcParams.cageRPM,mcParams.coilerRPM};
 			noOfMotors = 4;
 			SendChangeTargetToMultipleMotors(motors,noOfMotors,targets);
 			S.settingsModified = 0;
 		}
+
 		// TO CHANGE for the carding sensors
-		/*if (sensor.latchedtrunkSensor){
-			//Pause
-			sensor.latchedtrunkSensor = 0;
-			uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
-			noOfMotors = 6;
-			response = SendCommands_To_MultipleMotors(motors,noOfMotors,RAMPDOWN_STOP);
-			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_OFF,AMBER_ON);
-			TowerLamp_ApplyState(&hmcp,&mcp_portB);
-
-			//TODO - later make it such that once the CAN starts it never needs to stop.
-			SO_disableAndResetCANObservers(&SO);
-
-			S.runMode = RUN_PAUSED;
-			S.BT_pauseReason = BT_PAUSE_CREEL_SLIVER_CUT;
-			L.logRunStateChange = 1;
+		DuctSensorMonitor(&sensor,&msp);
+		if (sensor.ductSensorOneShot){
+			if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
+				uint8_t motors[] = {BEATER_FEED};
+				noOfMotors = 1;
+				response = SendCommands_To_MultipleMotors(motors,noOfMotors,RAMPDOWN_STOP);
+			}else if(sensor.ductCurrentState == DUCT_SENSOR_OPEN){
+				uint8_t motors[] = {BEATER_FEED};
+				noOfMotors = 1;
+				response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
+			}else{}
+			sensor.ductSensorOneShot = 0;
 		}
-		*/
+
 		//--------ways to go into Error State--------
 
 		//Error State
@@ -180,7 +208,7 @@ void RunState(void){
 		//--------sending BT info--------
 		// 500ms timer.
 		if ((S.BT_sendState == 1) && (S.BT_transmission_over == 1)){
-			if (S.runMode == RUN_OPERATING ){
+			if (S.runMode != RUN_PAUSED){
 				BTpacketSize = BT_MC_generateStatusMsg(BT_RUN);
 			}else{
 				BTpacketSize = BT_MC_generateStatusMsg(BT_PAUSE);
@@ -197,13 +225,23 @@ void RunState(void){
 			break;
 		}
 
-		//TODO:TO STOP WHEN LENGTH FINISHED
+		//without stopping blink and blare to tell the indicator to change the CAN, and then go back to
+		//your normal run mode
 		if (mcParams.currentMtrsRun >= msp.lengthLimit){
-			ChangeState(&S,FINISHED_STATE);
-			break;
+			if (S.runMode!= RUN_OVER){
+				S.runMode = RUN_OVER;
+				S.oneSecTimer = 0;
+				TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_ON,RED_ON,GREEN_ON,AMBER_ON);
+				TowerLamp_ApplyState(&hmcp,&mcp_portB);
+			}else{
+				if (S.oneSecTimer == 10){
+					S.runMode = RUN_ALL;
+					mcParams.currentMtrsRun = 0;
+					TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_ON,AMBER_OFF);
+					TowerLamp_ApplyState(&hmcp,&mcp_portB);
+				}
+			}
 		}
-
-
 
 	}//closes while
 

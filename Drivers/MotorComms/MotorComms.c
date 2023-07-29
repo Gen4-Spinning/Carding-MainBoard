@@ -18,13 +18,13 @@ void ReadySetupCommand_AllMotors(machineSettingsTypeDef *ms,machineParamsTypeDef
 	SU[2].RPM = mp->cageRPM;
 	SU[3].RPM = mp->cylinderFeedRPM;
 	SU[4].RPM = mp->beaterFeedRPM;
-	SU[4].RPM = mp->coilerRPM;
+	SU[5].RPM = mp->coilerRPM;
 	for (int i= 0;i<2;i++){
 		SU[i].RDT = CYLINDERS_RAMP_TIME_SEC;
 		SU[i].RUT = CYLINDERS_RAMP_TIME_SEC;
 	}
-	for (int i= 2;i<6;i++){
-		SU[i].RDT = ms->rampTimes;
+	for (int i=2;i<6;i++){
+		SU[i].RDT = 2; // hardcoded
 		SU[i].RUT = ms->rampTimes;
 	}
 
@@ -244,9 +244,9 @@ uint8_t  Send_DiagCommands_To_MultipleMotors(uint8_t *motorList,uint8_t motorArr
 }
 
 
-uint8_t SendChangeTargetToMultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint8_t *changeTargets){
+uint8_t SendChangeTargetToMultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint16_t *changeTargets){
 	uint8_t noOfMotors = 0;
-	uint16_t targetRampTime = 0;
+	uint16_t targetRpm = 0;
 	uint16_t motorAcksCheck = 0;
 	uint8_t canID;
 	uint8_t motorAddresses[6]={};
@@ -263,8 +263,8 @@ uint8_t SendChangeTargetToMultipleMotors(uint8_t *motorList,uint8_t motorArraySi
 	ACK_startCheck(motorAcksCheck,ACK_FOR_CHANGERPM, NON_CRITICAL_ACK);
 	for (int i=0;i<noOfMotors;i++){
 		canID = motorAddresses[i];
-		targetRampTime = changeTargets[i];
-		FDCAN_sendChangeTarget_ToMotor(canID,targetRampTime,msp.rampTimes);
+		targetRpm = changeTargets[i];
+		FDCAN_sendChangeTarget_ToMotor(canID,targetRpm,msp.rampTimes*1000);
 	}
 	while(ack.waitingForAckResult){};
 	if (ack.ackResult ==  ACK_FAIL){

@@ -10,6 +10,7 @@
 
 #include "stdio.h"
 #include "FDCAN.h"
+#include "Struct.h"
 
 //all Structs with arrays have to follow this Form
 #define CARDING_CYLINDER 0
@@ -19,8 +20,8 @@
 #define BEATER_FEED 4
 #define COILER 5
 
-#define CYLINDER_GEAR_RATIO 1.20
-#define BEATER_GEAR_RATIO 1.20
+#define CYLINDER_GEAR_RATIO 1.17 // changed from 1.20 after measuring on machine
+#define BEATER_GEAR_RATIO 1.17
 #define BEATER_FEED_GB 180
 #define CYLINDER_FEED_GB 180
 #define TONGUE_GROOVE_CIRCUMFERENCE_MM 213.63
@@ -75,9 +76,11 @@ void LoadDefaultMachineSettings(machineSettingsTypeDef* m);
 //otherFns
 void InitializeMachineSettings(machineSettingsTypeDef *ms);
 void CalculateMachineParameters(machineSettingsTypeDef *ms,machineParamsTypeDef *mp);
+void UpdateMachineParameters(machineSettingsTypeDef *ms,machineParamsTypeDef *m);
 
 uint8_t getMotorCANAddress(uint8_t motor);
 uint8_t GetMotorID_from_CANAddress(uint8_t canAddress);
 
+uint8_t CheckCylindersRampUpOver(machineParamsTypeDef *mcp,RunTime_TypeDef *cylinder,RunTime_TypeDef *beater);
 
 #endif /* MACHINESETTINGS_H_ */

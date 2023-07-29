@@ -49,9 +49,12 @@ void SettingsState(void){
 		  HAL_UART_Transmit_IT(&huart1,(uint8_t*)SAVINGFAILURE,6);
 	  }
 	}
-	  /* go back to the idle state. the new values get integrated into the
+	  /* go back to the idle or run state. the new values get integrated into the
 	   * machine parameters struct in the idle state when you first enter it
 	   */
 
 	  ChangeState(&S,S.prev_state);
+	  if (S.current_state == RUN_STATE){ // if you go back to run state, then dont send the rampUp msg to the cylinders.
+		  S.oneTime = 0;
+	  }
 }

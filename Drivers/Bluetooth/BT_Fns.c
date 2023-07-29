@@ -186,17 +186,32 @@ uint8_t ParseDiagnostics(void){
 					 D.targetDuty = temp + (10 - (temp%10));
 					 if (D.targetDuty < 800){
 						 rampTime = 5;
+						 // RAMPUP TIME FOR CYLINDERS NEEDS TO BE HIGH. OVERWRITE IF THOSE MOTORS
+						 if ((D.motorID == BT_CARDING_CYLINDER) || (D.motorID == BT_BEATER_CYLINDER)){
+							 rampTime = 40;
+						 }
 					 }else{
 						 rampTime = 10;
+						 // RAMPUP TIME FOR CYLINDERS NEEDS TO BE HIGH. OVERWRITE IF THOSE MOTORS
+						 if ((D.motorID == BT_CARDING_CYLINDER) || (D.motorID == BT_BEATER_CYLINDER)){
+							 rampTime = 60;
+						 }
 					 }
+
 					 count += 1;
 				}
 				if (D.typeofTest == CLOSEDLOOP){
 					D.targetRPM = (uint16_t)(T.value_int);
 					if (D.targetRPM < 800){
 						 rampTime = 5;
+						 if ((D.motorID == BT_CARDING_CYLINDER) || (D.motorID == BT_BEATER_CYLINDER)){
+							 rampTime = 60;
+						 }
 					 }else{
 						 rampTime = 10;
+						 if ((D.motorID == BT_CARDING_CYLINDER) || (D.motorID == BT_BEATER_CYLINDER)){
+							 rampTime = 60;
+						 }
 					 }
 					count += 1;
 				}
@@ -216,7 +231,7 @@ uint8_t ParseDiagnostics(void){
 		}
     }
 
-    if (D.motorID < 6){
+    if (D.motorID <= 6){
 		if (count == 5){
 			allSettingsRecieved = 1;
 		}
@@ -319,7 +334,7 @@ uint8_t BT_MC_generateStatusMsg(uint8_t state){
 		  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_FLOAT,initLength+tlvSize);
 		  tlvSize += TLV_FLOAT;
 
-		  generateTLV_I(TLV_Buffer,RUN_DUCT_SENSOR,0);
+		  generateTLV_I(TLV_Buffer,RUN_DUCT_SENSOR,sensor.ductCurrentState);
 		  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_INT,initLength+tlvSize);
 		  tlvSize += TLV_INT;
 
@@ -328,28 +343,28 @@ uint8_t BT_MC_generateStatusMsg(uint8_t state){
 		  tlvSize += TLV_INT;
 
 		  if (S.BT_runInfoToSend == RUN_PRODUCTION_DATA){
-			  generateTLV_F(TLV_Buffer,RUN_OUTPUT_MTRS_PER_SPINDLE,150.54);
+			  generateTLV_F(TLV_Buffer,RUN_OUTPUT_MTRS_PER_SPINDLE,mcParams.currentMtrsRun);
 			  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_FLOAT,initLength+tlvSize);
 			  tlvSize += TLV_FLOAT;
 
-			  generateTLV_F(TLV_Buffer,RUN_TOTAL_POWER,250); // totalPower
+			  generateTLV_F(TLV_Buffer,RUN_TOTAL_POWER,mcParams.totalPower); // totalPower
 			  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_FLOAT,initLength+tlvSize);
 			  tlvSize += TLV_FLOAT;
 		  }else{
 			  //send motor Data
-			  generateTLV_I(TLV_Buffer,RUN_TLV_MOTOR_TEMP, 12+S.BT_runInfowhichMotor );//R[S.BT_runInfowhichMotor].motorTemp);
+			  generateTLV_I(TLV_Buffer,RUN_TLV_MOTOR_TEMP, R[S.BT_runInfowhichMotor].motorTemp);
 			  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_INT,initLength+tlvSize);
 			  tlvSize += TLV_INT;
 
-			  generateTLV_I(TLV_Buffer,RUN_TLV_MOSFET_TEMP, 15+S.BT_runInfowhichMotor);//R[S.BT_runInfowhichMotor].mosfetTemp);
+			  generateTLV_I(TLV_Buffer,RUN_TLV_MOSFET_TEMP,R[S.BT_runInfowhichMotor].mosfetTemp);
 			  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_INT,initLength+tlvSize);
 			  tlvSize += TLV_INT;
 
-			  generateTLV_F(TLV_Buffer,RUN_TLV_MOTOR_CURRENT,40+S.BT_runInfowhichMotor);//R[S.BT_runInfowhichMotor].currentA);
+			  generateTLV_F(TLV_Buffer,RUN_TLV_MOTOR_CURRENT,R[S.BT_runInfowhichMotor].currentA);
 			  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_FLOAT,initLength+tlvSize);
 			  tlvSize += TLV_FLOAT;
 
-			  generateTLV_I(TLV_Buffer,RUN_TLV_MOTOR_RPM,200+S.BT_runInfowhichMotor);//R[S.BT_runInfowhichMotor].presentRPM);
+			  generateTLV_I(TLV_Buffer,RUN_TLV_MOTOR_RPM,R[S.BT_runInfowhichMotor].presentRPM);
 			  add_TLVBuf_To_TxBuf(TLV_Buffer,TLV_INT,initLength+tlvSize);
 			  tlvSize += TLV_INT;
 		  }

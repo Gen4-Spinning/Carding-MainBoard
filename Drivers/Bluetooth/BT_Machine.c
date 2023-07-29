@@ -97,7 +97,7 @@ uint8_t BT_MC_parse_Settings(machineSettingsTypeDef *mspBT){
     			count += 1;
     			break;
        		case TRUNK_DELAY_BT:
-				mspBT->trunkDelay = T.value_f;
+				mspBT->trunkDelay = T.value_int;
 				count += 1;
 				break;
     		case LENGTH_LIMIT_BT:

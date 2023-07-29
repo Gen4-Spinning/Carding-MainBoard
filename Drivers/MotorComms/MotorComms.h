@@ -27,6 +27,6 @@ extern SetupMotor SU[6];
 void ReadySetupCommand_AllMotors(machineSettingsTypeDef *ms,machineParamsTypeDef *mp);
 uint8_t SendCommands_To_MultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint8_t command);
 uint8_t Send_DiagCommands_To_MultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint8_t command);
-uint8_t SendChangeTargetToMultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint8_t *changeTargets);
+uint8_t SendChangeTargetToMultipleMotors(uint8_t *motorList,uint8_t motorArraySize,uint16_t *changeTargets);
 
 #endif /* MOTORCOMMS_H_ */
