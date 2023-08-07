@@ -43,5 +43,6 @@ void SO_enableCANObservers(SysObserver *so,uint8_t *motorList,uint8_t noOfMotors
 void SO_disableAndResetCANObservers(SysObserver *so);
 void SO_incrementCANCounter(SysObserver *so,uint8_t motorID);
 uint8_t SO_checkCanObservers(SysObserver *so);
+void SO_disableCanObserver(SysObserver *so,uint8_t motorID);
 
 #endif /* SYSOBSERVER_H_ */

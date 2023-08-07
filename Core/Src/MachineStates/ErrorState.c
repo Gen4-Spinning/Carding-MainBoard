@@ -39,6 +39,7 @@ void ErrorState(void){
 	uint8_t BTpacketSize = 0;
 	uint8_t SMPS_turnOff_oneTime = 1;
 	uint8_t BTmotorID = 0;
+	uint16_t errSource = 0;
 	while(1){
 
 		if (S.oneTime){
@@ -52,14 +53,27 @@ void ErrorState(void){
 					SMPS_TurnOff(); // ACK err, CAN cut error and SMPS Err
 					S.SMPS_switchOff = 0;
 				}
-				SetBTErrors(&ME,ME.errReason1,ME.errSource1,ME.errCode1);
-
+				//for CAN cut error we re saying which motor the fault is coming from, so for that we need
+				//to set the correct HMI motor ID
+				if (ME.errReason1 == SYS_CAN_CUT_ERROR){
+					errSource = GetBTMotorID_from_Motor_ID(ME.errSource1);
+				}else{
+					errSource = ME.errSource1;
+				}
+				SetBTErrors(&ME,ME.errReason1,errSource,ME.errCode1);
 			}else if (ME.errType2 == ERR_SYSTEM_LEVEL_SOURCE){
 				if (ME.errReason1 != SYS_LIFT_RELATIVE_ERROR){
 					SMPS_TurnOff(); // ACK err, CAN cut error and SMPS Err
 					S.SMPS_switchOff = 0;
 				}
-				SetBTErrors(&ME,ME.errReason2,ME.errSource2,ME.errCode2);
+				//for CAN cut error we re saying which motor the fault is coming from, so for that we need
+				//to set the correct HMI motor ID
+				if (ME.errReason2 == SYS_CAN_CUT_ERROR){
+					errSource = GetBTMotorID_from_Motor_ID(ME.errSource2);
+				}else{
+					errSource = ME.errSource2;
+				}
+				SetBTErrors(&ME,ME.errReason1,errSource,ME.errCode1);
 
 			}else if (ME.errType1 == ERR_MOTOR_SOURCE){
 				//send the Stop commands

@@ -27,8 +27,10 @@ void InitializeState_TypeDef(StateTypeDef *s){
 
 	s->SMPS_switchOff = 0;
 	s->SMPS_OK_signal = 0;
-	s->SMPS_cntrl = 0;;
+	s->SMPS_cntrl = 0;
 
+	s->piecingTimer = 0;
+	s->piecingTimerBool = 0;
 }
 
 void ChangeState(StateTypeDef *s, uint8_t newState){

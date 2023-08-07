@@ -30,7 +30,7 @@
 #define COILER_GROOVE_TO_GB_RATIO 1.656
 #define COILER_GB 6.91
 
-#define CYLINDERS_RAMP_TIME_SEC 60
+#define CYLINDERS_RAMP_TIME_SEC 75
 
 typedef struct machineSettings_Struct{
 	float delivery_mMin;

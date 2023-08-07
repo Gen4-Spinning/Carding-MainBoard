@@ -84,6 +84,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 machineSettingsTypeDef msp;
+machineSettingsTypeDef ps; // piecing settings
 machineSettingsTypeDef msp_BT;
 machineParamsTypeDef mcParams;
 MBErrorsTypeDef MBE;
@@ -112,6 +113,7 @@ char BufferRec[150];
 char BufferTransmit[150] ;// Buffer for Transmit
 char LogBuffer[2048];
 
+int ductStateDbg = -1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -158,19 +160,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim == &htim16){ // 1 sec timer that checks if the CAN connections are all OK.
 	  SO.canOverallStatus = SO_checkCanObservers(&SO);
-	  if (SO.canOverallStatus != ALL_CANS_HEALTHY ) {
-		  if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
-			  //do Nothing. If someone pulls the CAN out when sensor is closed,motor is stopped, and
-			  //on resume we ll get ACK error so its somewhat handled. Otherwise if u turn off only one
-			  //Can observer, when u resume we need to restart all.(which is also fine)
-		  }else{
-			  ME.ErrorFlag = 1;
-			  ME_addErrors(&ME,ERR_SYSTEM_LEVEL_SOURCE,SYS_CAN_CUT_ERROR, SO.canOverallStatus, 0); // maybe later find out which ACK failed.
-			  S.SMPS_switchOff = 1;
-			  //stp the timer if you find you have an error.
-			  HAL_TIM_Base_Stop_IT(&htim16);
-		  }
-	  }
+	  /*if (SO.canOverallStatus != ALL_CANS_HEALTHY ) {
+		  ME.ErrorFlag = 1;
+		  ME_addErrors(&ME,ERR_SYSTEM_LEVEL_SOURCE,SYS_CAN_CUT_ERROR, SO.canOverallStatus, 0); // maybe later find out which ACK failed.
+		  S.SMPS_switchOff = 1;
+		  //stp the timer if you find you have an error.
+		  HAL_TIM_Base_Stop_IT(&htim16);
+	  }*/
   }
 
   if(htim==&htim15){
@@ -195,6 +191,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  S.oneSecTimer++;
 		  timer7Count = 0;
 		  Toggle_State_LEDs(&S);
+
+		  sensor.ductSensorClosedTimer ++;
 		  if (sensor.ductTimerIncrementBool){
 			  sensor.ductSensorTimer++;
 		  }
@@ -207,14 +205,16 @@ uint8_t sensorVal;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	UNUSED(GPIO_Pin);
 
-	if (GPIO_Pin == INT_B_Pin){
+	/*if (GPIO_Pin == INT_B_Pin){
 		sensorTrigger = Sensor_whichTriggered(&hmcp,&mcp_portB_sensorVal);
 		if (sensorTrigger == DUCT_SENSOR){
 			sensor.ductSensor = Sensor_GetTriggerValue(&hmcp,&mcp_portB_sensorVal,DUCT_SENSOR);
 			// here if there is a change we get a trigger. So if we dont get a trigger value for
 			// trigger seconds, it means the state has not changed for x sec.
 		}
-	}else if (GPIO_Pin == SMPS_OK_IP_Pin){
+	}else*/
+
+	if (GPIO_Pin == SMPS_OK_IP_Pin){
 		// if the mother board has turned the SMPS on, but the smps is off, we have a problem!
 		S.SMPS_OK_signal = (uint8_t)(HAL_GPIO_ReadPin(SMPS_OK_IP_GPIO_Port, SMPS_OK_IP_Pin));
 		if ((S.SMPS_cntrl == SMPS_TURNEDON) && (S.SMPS_OK_signal == SMPS_OFF)){
@@ -336,6 +336,8 @@ int main(void)
   ReadySetupCommand_AllMotors(&msp,&mcParams);
   SO_Reset_InitialLiftPosRecieved(&SO);
 
+  InitializePiecingSettings(&ps,&msp);
+
   //Interrupts on UART1 connected to the bluetooth
   __HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);//interrupt on receive buffer not empty(buffer full)
   __HAL_UART_ENABLE_IT(&huart1,UART_IT_TC );//interrupt on Transmission Complete
@@ -375,18 +377,13 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim16);
 
   //at startup make both duct sensor states, instantaneous and current open
-  sensor.ductCurrentState = DUCT_SENSOR_OPEN;
-  sensor.ductSensor = DUCT_SENSOR_OPEN;
+  sensor.ductSensor = Sensor_ReadValueDirectly(&hmcp,&mcp_portB_sensorVal,DUCT_SENSOR);
+  sensor.ductCurrentState = sensor.ductSensor ;
 
   //SMPS - turn on the SMPS, wait a while to see if  short command.
-  SMPS_TurnOn();
+  SMPS_Init();
   HAL_Delay(1000);//contactor takes a long time to turn on.
-  /*uint8_t smps = (uint8_t)(HAL_GPIO_ReadPin(SMPS_OK_IP_GPIO_Port, SMPS_OK_IP_Pin));
-  if (smps == SMPS_OFF){
-	  ME.ErrorFlag = 1;
-	  ME_addErrors(&ME,ERR_SYSTEM_LEVEL_SOURCE, SYS_SMPS_ERROR, ERROR_SOURCE_SYSTEM,0); // maybe later find out which ACK failed.
-	  S.SMPS_switchOff = 1;
-  }*/
+  S.SMPS_cntrl = SMPS_TURNEDON;
 
   /* USER CODE END 2 */
 

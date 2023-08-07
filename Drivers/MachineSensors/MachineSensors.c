@@ -30,23 +30,29 @@ int8_t Sensor_GetTriggerValue(MCP23017_HandleTypeDef *mcp, MCP23017_PortB *senso
 	return -1;
 }
 
+int8_t Sensor_ReadValueDirectly(MCP23017_HandleTypeDef *mcp, MCP23017_PortB *sensorVal,uint8_t sensor){
+	mcp23017_read(mcp, MCP_GPIOB,mcp->intTriggerCapturedValue); // captures GPIO value when interrupt comes.
+	sensorVal->raw = mcp->intTriggerCapturedValue[0];
+	if (sensor == DUCT_SENSOR){
+		return sensorVal->values.input0;
+	}
+	return -1;
+}
 void SetCoilerSensorState(SensorTypeDef *s,uint8_t state){
 	s->coilerSensor_activated = state;
 }
 
 void DuctSensorMonitor(SensorTypeDef *s,machineSettingsTypeDef *msp){
 	if (s->ductSensor != s->ductCurrentState){
-		s->ductTimerIncrementBool = 1;
-		if (s->ductSensorTimer >= msp->trunkDelay){
-			s->ductCurrentState = s->ductSensor;
-			s->ductTimerIncrementBool = 0;
+			s->ductTimerIncrementBool = 1;
+			if (s->ductSensorTimer >= msp->trunkDelay){
+				s->ductCurrentState = s->ductSensor;
+				s->ductSensorTimer = 0;
+				s->ductSensorOneShot = 1;
+			}
+		}else{
 			s->ductSensorTimer = 0;
-			s->ductSensorOneShot = 1;
+			s->ductTimerIncrementBool = 0;
 		}
-	}
-	else{
-		s->ductTimerIncrementBool = 0;
-		s->ductSensorTimer = 0;
-	}
 }
 

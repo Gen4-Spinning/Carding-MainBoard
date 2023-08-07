@@ -57,21 +57,21 @@ uint8_t CheckMachineSettings(machineSettingsTypeDef* m){
 	if ((m->delivery_mMin > 15 ) || (m->delivery_mMin < 6)){
 		return 0;
 	}
-	if ((m->draft > 1.50f)||(m->draft < 0.5)){
+	if ((m->draft > 4.0f)||(m->draft < 0.5)){
 		return 0;
 	}
 	if ((m->cylinderSpeed > 1500)||(m->cylinderSpeed < 1200)){
 		return 0;
 	}
 
-	if ((m->cylinderFeed > 5) || (m->cylinderFeed < 0.1)){
+	if ((m->cylinderFeed > 8) || (m->cylinderFeed < 0.1)){
 		return 0;
 	}
 	if ((m->beaterSpeed > 1300) || (m->beaterSpeed < 800)){
 		return 0;
 	}
 
-	if ((m->beaterFeed > 5) || (m->beaterSpeed < 0.1)){
+	if ((m->beaterFeed > 8) || (m->beaterSpeed < 0.1)){
 		return 0;
 	}
 

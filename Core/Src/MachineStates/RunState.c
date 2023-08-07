@@ -27,6 +27,8 @@
 
 extern UART_HandleTypeDef huart1;
 
+uint8_t ductStateDirect = 0;
+uint8_t ductStateDirectCount = 0;
 void RunState(void){
 
 	/* when you enter this state, start the cylinder motors. When the cylinders have reached their top speed,
@@ -44,12 +46,13 @@ void RunState(void){
 	uint8_t noOfMotors = 0;
 	uint8_t BTpacketSize = 0;
 	long currentTime;
+	uint8_t rampOver = 0;
 	while(1){
 
 		if (S.oneTime){
 			//send the start commands
-			uint8_t motors[] = {CARDING_CYLINDER,BEATER_CYLINDER};
-			noOfMotors = 2;
+			uint8_t motors[] = {CARDING_CYLINDER,BEATER_CYLINDER,COILER};
+			noOfMotors = 3;
 			response = SendCommands_To_MultipleMotors(motors,noOfMotors,START);
 			if (response!= 2){
 				SO_enableCANObservers(&SO,motors,noOfMotors);
@@ -57,9 +60,10 @@ void RunState(void){
 
 			S.runMode = RUN_RAMPUP;
 			mcParams.allMotorsOn = 0;
+			rampOver = 0;
 
 			uint8_t motors1[] = {CARDING_CYLINDER,BEATER_CYLINDER,CARDING_FEED,BEATER_FEED,CAGE,COILER};
-			Log_setUpLogging(&L,motors1,5);
+			Log_setUpLogging(&L,motors1,6);
 			Log_ResetBufferIndex(&L);
 			if (S.LOG_enabled){
 				L.bufferIdx += Log_addSettingsDataToBuffer(&msp,L.bufferIdx);
@@ -74,15 +78,15 @@ void RunState(void){
 		}
 
 		if (S.runMode == RUN_RAMPUP){
-			uint8_t rampOver = CheckCylindersRampUpOver(&mcParams,&R[CARDING_CYLINDER],&R[BEATER_CYLINDER]);
+			rampOver = CheckCylindersRampUpOver(&mcParams,&R[CARDING_CYLINDER],&R[BEATER_CYLINDER]);
 			if (rampOver == 1){
 				S.runMode = RUN_ALL;
 				mcParams.allMotorsOn = 1;
 				//before we start the other motors we need to stop the can checking
 				SO_disableAndResetCANObservers(&SO);
 
-				uint8_t motors[] = {CARDING_FEED,BEATER_FEED,COILER,CAGE};
-				noOfMotors = 4;
+				uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE};
+				noOfMotors = 3;
 				response = SendCommands_To_MultipleMotors(motors,noOfMotors,START);
 
 				//TODO - later make it such that once the CAN starts it never needs to stop.
@@ -179,19 +183,57 @@ void RunState(void){
 			S.settingsModified = 0;
 		}
 
-		// TO CHANGE for the carding sensors
-		DuctSensorMonitor(&sensor,&msp);
-		if (sensor.ductSensorOneShot){
-			if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
-				uint8_t motors[] = {BEATER_FEED};
-				noOfMotors = 1;
-				response = SendCommands_To_MultipleMotors(motors,noOfMotors,RAMPDOWN_STOP);
-			}else if(sensor.ductCurrentState == DUCT_SENSOR_OPEN){
-				uint8_t motors[] = {BEATER_FEED};
-				noOfMotors = 1;
-				response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
-			}else{}
-			sensor.ductSensorOneShot = 0;
+		//read once a sec
+		sensor.ductSensor = Sensor_ReadValueDirectly(&hmcp,&mcp_portB_sensorVal,DUCT_SENSOR);
+		if (sensor.ductCurrentState == DUCT_SENSOR_OPEN){
+			if (sensor.ductSensor  == DUCT_SENSOR_CLOSED){
+				if (sensor.ductTimerIncrementBool == 0){
+					sensor.ductSensorTimer = 0;
+					sensor.ductTimerIncrementBool = 1;
+				}else{
+					if (sensor.ductSensorTimer >= msp.trunkDelay){
+						uint8_t motors[] = {BEATER_FEED};
+						noOfMotors = 1;
+						response = SendCommands_To_MultipleMotors(motors,noOfMotors,RAMPDOWN_STOP);
+						if (response == 1){
+							sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
+							sensor.ductTimerIncrementBool = 0;
+							SO_disableCanObserver(&SO,BEATER_FEED);
+						}
+					}
+				}
+			}else{ //might have triggered but not for trunk delay time, so restart the count
+				sensor.ductTimerIncrementBool = 0;
+				sensor.ductCurrentState = DUCT_SENSOR_OPEN;
+			}
+		}else{ // if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
+			if (sensor.ductSensor  == DUCT_SENSOR_OPEN){
+				if (sensor.ductTimerIncrementBool == 0){
+					sensor.ductSensorTimer = 0;
+					sensor.ductTimerIncrementBool = 1;
+				}else{
+					if (sensor.ductSensorTimer >= msp.trunkDelay){
+
+						uint8_t motors[] = {BEATER_FEED};
+						noOfMotors = 1;
+						response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
+
+						if (response == 1){
+							sensor.ductCurrentState = DUCT_SENSOR_OPEN;
+							sensor.ductTimerIncrementBool = 0;
+
+							//enable all motors again
+							uint8_t motors1[] = {CARDING_CYLINDER,BEATER_CYLINDER,CARDING_FEED,BEATER_FEED,CAGE,COILER};
+							noOfMotors = 6;
+							SO_enableCANObservers(&SO,motors1,noOfMotors);
+
+						}
+					}
+				}
+			}else{ //might have triggered but not for trunk delay time, so restart the count
+				sensor.ductTimerIncrementBool = 0;
+				sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
+			}
 		}
 
 		//--------ways to go into Error State--------

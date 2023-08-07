@@ -20,6 +20,18 @@ void InitializeMachineSettings(machineSettingsTypeDef *ms){
 	ms->rampTimes = 3;
 }
 
+void InitializePiecingSettings(machineSettingsTypeDef *ps,machineSettingsTypeDef *ms){
+	ps->delivery_mMin = 6;
+	ps->draft = ms->draft;
+	ps->cylinderSpeed = ms->cylinderSpeed;
+	ps->cylinderFeed = 1.5;
+	ps->beaterSpeed = ms->beaterSpeed ;
+	ps->beaterFeed = 1.5;
+	ps->trunkDelay = ms->trunkDelay;
+	ps->lengthLimit = ms->lengthLimit;
+	ps->rampTimes = ms->rampTimes;
+}
+
 void CalculateMachineParameters(machineSettingsTypeDef *ms,machineParamsTypeDef *m){
 	m->cylinderRPM = ms->cylinderSpeed/CYLINDER_GEAR_RATIO;
 	m->beaterRPM = ms->beaterSpeed/BEATER_GEAR_RATIO;
@@ -82,8 +94,8 @@ uint8_t GetMotorID_from_CANAddress(uint8_t canAddress){
 
 
 uint8_t CheckCylindersRampUpOver(machineParamsTypeDef *mcp,RunTime_TypeDef *cylinder,RunTime_TypeDef *beater){
-	if (cylinder->presentRPM > (mcp->cylinderRPM - 100)){
-		if (beater->presentRPM > (mcp->beaterRPM - 100)){
+	if (cylinder->presentRPM >= (mcp->cylinderRPM - 20)){
+		if (beater->presentRPM >= (mcp->beaterRPM - 20)){
 			return 1;
 		}
 	}
