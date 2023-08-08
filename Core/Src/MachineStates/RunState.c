@@ -24,6 +24,7 @@
 #include "mcp23017.h"
 #include "MachineSensors.h"
 #include "Log.h"
+#include "BT_Machine.h"
 
 extern UART_HandleTypeDef huart1;
 
@@ -142,13 +143,13 @@ void RunState(void){
 			mcParams.totalPower = R[0].power + R[1].power + R[2].power + R[3].power + R[4].power + R[5].power;
 			currentTime = S.oneSecTimer;
 		}
-		/*if ((usrBtns.rotarySwitch == ROTARY_SWITCH_ON) && (sensor.coilerSensor_activated == 0)){
-			SetCoilerSensorState(&sensor,SENSOR_ENABLE);
-		}
 
-		if ((usrBtns.rotarySwitch == ROTARY_SWITCH_OFF) && (sensor.coilerSensor_activated == 1)){
-			SetCoilerSensorState(&sensor,SENSOR_DISABLE);
-		}*/
+
+		if (usrBtns.rotarySwitch == ROTARY_SWITCH_ON){
+
+		}else{
+
+		}
 
 		// stop btn
 		if (usrBtns.redBtn == BTN_PRESSED){
@@ -263,7 +264,15 @@ void RunState(void){
 
 		/*---- go into settings when need be-----*/
 		if (S.switchState == TO_SETTINGS){
-			ChangeState(&S,SETTINGS_STATE);
+			if (BT.subState == UPDATE_CARDING_SETTINGS){ // BUG FIX. NEED TO SEE WHATS HAPPENING WITH
+				if (S.runMode ==  RUN_ALL){
+					uint8_t motors[] = {BEATER_FEED};
+					noOfMotors = 1;
+					response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
+				}
+			}else{
+				ChangeState(&S,SETTINGS_STATE);
+			}
 			S.switchState = 0;
 			break;
 		}

@@ -44,9 +44,6 @@ typedef struct StateStruct
 
 	char settingsModified;
 
-	uint8_t piecingTimer;
-	uint8_t piecingTimerBool;
-
 	long oneSecTimer;
 	char BT_sendState;
 	char BT_pauseReason;
