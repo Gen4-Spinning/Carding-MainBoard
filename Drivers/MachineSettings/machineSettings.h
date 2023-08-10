@@ -64,6 +64,7 @@ typedef struct machineParamaters_Struct{
 
 
 extern machineSettingsTypeDef msp;
+extern machineSettingsTypeDef ps;
 extern machineSettingsTypeDef msp_BT;
 extern machineParamsTypeDef mcParams;
 

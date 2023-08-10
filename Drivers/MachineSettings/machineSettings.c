@@ -26,7 +26,7 @@ void InitializePiecingSettings(machineSettingsTypeDef *ps,machineSettingsTypeDef
 	ps->cylinderSpeed = ms->cylinderSpeed;
 	ps->cylinderFeed = 1.5;
 	ps->beaterSpeed = ms->beaterSpeed ;
-	ps->beaterFeed = 1.5;
+	ps->beaterFeed = 3.5;
 	ps->trunkDelay = ms->trunkDelay;
 	ps->lengthLimit = ms->lengthLimit;
 	ps->rampTimes = ms->rampTimes;

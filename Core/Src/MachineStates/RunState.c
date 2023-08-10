@@ -86,6 +86,16 @@ void RunState(void){
 				//before we start the other motors we need to stop the can checking
 				SO_disableAndResetCANObservers(&SO);
 
+				// check if piecing mode, if yes,run slowly, else run normal speed.
+				if (usrBtns.rotarySwitch == ROTARY_SWITCH_ON){
+					CalculateMachineParameters(&ps,&mcParams);
+					S.piecingMode = 1;
+				}else{
+					CalculateMachineParameters(&msp,&mcParams);
+					S.piecingMode = 0;
+				}
+				ReadySetupCommand_AllMotors(&msp,&mcParams);
+
 				uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE};
 				noOfMotors = 3;
 				response = SendCommands_To_MultipleMotors(motors,noOfMotors,START);
@@ -123,6 +133,16 @@ void RunState(void){
 		if ((usrBtns.greenBtn == BTN_PRESSED)  && (S.runMode == RUN_PAUSED)){
 			usrBtns.greenBtn = BTN_IDLE;
 			//RESUME
+
+			if (usrBtns.rotarySwitch == ROTARY_SWITCH_ON){
+				CalculateMachineParameters(&ps,&mcParams);
+				S.piecingMode = 1;
+			}else{
+				CalculateMachineParameters(&msp,&mcParams);
+				S.piecingMode = 0;
+			}
+			ReadySetupCommand_AllMotors(&msp,&mcParams);
+
 			uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
 			noOfMotors = 4;
 			response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
@@ -145,10 +165,29 @@ void RunState(void){
 		}
 
 
+		//need to disallow changes very fast. TODO LATER.
 		if (usrBtns.rotarySwitch == ROTARY_SWITCH_ON){
-
+			// if already in piecing mode do nothing.
+			if (S.piecingMode == 0){
+				UpdateMachineParameters(&ps,&mcParams);
+				uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
+				uint16_t targets[] = {mcParams.cylinderFeedRPM,mcParams.beaterFeedRPM,
+									 mcParams.cageRPM,mcParams.coilerRPM};
+				noOfMotors = 4;
+				SendChangeTargetToMultipleMotors(motors,noOfMotors,targets);
+				S.piecingMode = 1;
+			}
 		}else{
-
+			// if already in run mode do nothing.
+			if (S.piecingMode == 1){
+				UpdateMachineParameters(&msp,&mcParams);
+				uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
+				uint16_t targets[] = {mcParams.cylinderFeedRPM,mcParams.beaterFeedRPM,
+									 mcParams.cageRPM,mcParams.coilerRPM};
+				noOfMotors = 4;
+				SendChangeTargetToMultipleMotors(motors,noOfMotors,targets);
+				S.piecingMode = 0;
+			}
 		}
 
 		// stop btn
@@ -174,6 +213,7 @@ void RunState(void){
 		}
 
 		//if settings modified through app for carding
+		// dont succesfully save or send msg when in piecing mode.
 		if (S.settingsModified == 1){
 			UpdateMachineParameters(&msp,&mcParams);
 			uint8_t motors[] = {CARDING_FEED,BEATER_FEED,CAGE,COILER};
