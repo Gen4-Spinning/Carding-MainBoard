@@ -31,6 +31,9 @@ typedef struct {
 	uint8_t ductSensorOneShot;
 	uint8_t ductSensorClosedTimer;
 
+	uint16_t ductStateAlignementTimer;
+	uint8_t ductStateAndBtrMotorAligned;
+
 	uint8_t coilerSensor_activated;
 	uint8_t coilerSensor;
 	uint8_t latchedCoilerSensor;
@@ -47,5 +50,6 @@ int8_t Sensor_ReadValueDirectly(MCP23017_HandleTypeDef *mcp, MCP23017_PortB *sen
 void SetCoilerSensorState(SensorTypeDef *s,uint8_t state);
 
 void DuctSensorMonitor(SensorTypeDef *s,machineSettingsTypeDef *msp);
+uint8_t DuctSensor_CompareDuctStateWithBeaterFeedState(SensorTypeDef *s,RunTime_TypeDef *btrFeedData);
 
 #endif /* MACHINESENSORS_H_ */

@@ -56,3 +56,25 @@ void DuctSensorMonitor(SensorTypeDef *s,machineSettingsTypeDef *msp){
 		}
 }
 
+// check 2 seconds after a change in state.
+uint8_t DuctSensor_CompareDuctStateWithBeaterFeedState(SensorTypeDef *s,RunTime_TypeDef *btrFeedData){
+	if (s->ductCurrentState == DUCT_SENSOR_OPEN){
+		if (btrFeedData->pwm <= 100){
+			// means the btr FEED is not running.
+			return 0;
+		}else{
+			return 1;
+		}
+	}
+	if (s->ductCurrentState == DUCT_SENSOR_CLOSED){
+		if (btrFeedData->pwm >= 100){
+			// means the btr FEED is running.
+			return 0;
+		}else{
+			return 1;
+		}
+	}
+
+	return 1;
+}
+

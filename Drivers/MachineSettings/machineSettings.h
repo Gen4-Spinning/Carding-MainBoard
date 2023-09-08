@@ -84,4 +84,6 @@ uint8_t GetMotorID_from_CANAddress(uint8_t canAddress);
 
 uint8_t CheckCylindersRampUpOver(machineParamsTypeDef *mcp,RunTime_TypeDef *cylinder,RunTime_TypeDef *beater);
 
+void InitializePiecingSettings(machineSettingsTypeDef *ps,machineSettingsTypeDef *ms);
+
 #endif /* MACHINESETTINGS_H_ */

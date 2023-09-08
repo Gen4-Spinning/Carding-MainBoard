@@ -108,6 +108,8 @@ void RunState(void){
 					SO_enableCANObservers(&SO,motors1,noOfMotors);
 				}
 				rampOver = 0;
+
+				sensor.ductStateAlignementTimer = 0;
 			}
 		}
 
@@ -241,6 +243,7 @@ void RunState(void){
 							sensor.ductTimerIncrementBool = 0;
 							SO_disableCanObserver(&SO,BEATER_FEED);
 						}
+						sensor.ductStateAlignementTimer = 0;
 					}
 				}
 			}else{ //might have triggered but not for trunk delay time, so restart the count
@@ -269,11 +272,28 @@ void RunState(void){
 							SO_enableCANObservers(&SO,motors1,noOfMotors);
 
 						}
+						sensor.ductStateAlignementTimer = 0;
 					}
 				}
 			}else{ //might have triggered but not for trunk delay time, so restart the count
 				sensor.ductTimerIncrementBool = 0;
 				sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
+			}
+		}
+
+		//WE need to check if the motor state and the duct state match, otherwise code gets locked.
+		//check once in 3 seconds only.
+		if (S.runMode == RUN_ALL){
+			if (sensor.ductStateAlignementTimer%3 == 0){
+				sensor.ductStateAndBtrMotorAligned = DuctSensor_CompareDuctStateWithBeaterFeedState(&sensor,&R[BEATER_FEED]);
+				if (!sensor.ductStateAndBtrMotorAligned){
+					if (sensor.ductCurrentState == DUCT_SENSOR_OPEN){
+						sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
+					}
+					if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
+						sensor.ductCurrentState = DUCT_SENSOR_OPEN;
+					}
+				}
 			}
 		}
 
@@ -309,6 +329,9 @@ void RunState(void){
 					uint8_t motors[] = {BEATER_FEED};
 					noOfMotors = 1;
 					response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
+					// ideally,update the duct state here. but since we dont have time to test leave it.
+					// if you press this, the duct Alignment fn will correct the state.
+
 				}
 			}else{
 				ChangeState(&S,SETTINGS_STATE);
