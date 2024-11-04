@@ -24,6 +24,10 @@ uint8_t Log_addSettingsDataToBuffer(machineSettingsTypeDef *m,uint16_t bufferLoc
 	return PACKET_SIZE_SETTINGS;
 }
 
+uint8_t Log_addSensorDebugDataToBuffer(SensorTypeDef *s,uint16_t bufferLocation){
+	sprintf(LogBuffer + bufferLocation,"Q,%01d,%01d,%01d,%02d,%1d,%03d,E\r\n",s->ductSensor,s->ductCurrentState,s->ductStateAndBtrMotorAligned,s->updateBtnPressed,s->ductSensorTimer,s->ductSensorDbgTimer);
+	return PACKET_SIZE_SNSRDBG;
+}
 
 uint8_t Log_StateChangeDataToBuffer(StateTypeDef *s,uint16_t bufferLocation){
 	sprintf(LogBuffer + bufferLocation,"R,%02d,%01d,%01d,%06lu,E\r\n",s->current_state,s->runMode,s->BT_pauseReason,s->oneSecTimer);
@@ -77,7 +81,7 @@ void Log_DoOneCycle(void){
 	 * and change the motor. if no new data keep waiting.
 	 */
 	if (L.DMA_transferOver == 1){
-		if ((BUFFER_LOG_SIZE - L.bufferIdx) > PACKET_SIZE_LIFT_MOTOR){
+		if ((BUFFER_LOG_SIZE - L.bufferIdx) > PACKET_SIZE_MINIMUM){
 			if (L.logRunStateChange == 1){
 				L.bufferIdx  += Log_StateChangeDataToBuffer(&S,L.bufferIdx);
 				L.logRunStateChange = 0;
@@ -88,6 +92,13 @@ void Log_DoOneCycle(void){
 				L.DMA_transferOver = 0;
 				L.bufferIdx = 0;
 				L.flushBuffer = 0;
+			}
+			else if (L.logSensorData){
+				L.bufferIdx  += Log_addSensorDebugDataToBuffer(&sensor,L.bufferIdx);
+				L.logSensorData = 0;
+				//after weve logged,we can remove the variables we ve kept for logging only.
+				sensor.LogductSensorTimerReached = 0;
+				sensor.LogductSensorStateCorrected = 0;
 			}
 			else{
 				L.mLog[L.loggingMotor].newData = LOG_checkNewData(&R[L.loggingMotor],&L,L.loggingMotor);

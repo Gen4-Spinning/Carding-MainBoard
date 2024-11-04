@@ -48,7 +48,6 @@ void DuctSensorMonitor(SensorTypeDef *s,machineSettingsTypeDef *msp){
 			if (s->ductSensorTimer >= msp->trunkDelay){
 				s->ductCurrentState = s->ductSensor;
 				s->ductSensorTimer = 0;
-				s->ductSensorOneShot = 1;
 			}
 		}else{
 			s->ductSensorTimer = 0;

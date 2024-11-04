@@ -13,6 +13,7 @@
 #include "StateMachine.h"
 #include "main.h"
 #include "machineSettings.h"
+#include "MachineSensors.h"
 
 extern UART_HandleTypeDef huart2;
 extern char LogBuffer[2048];
@@ -22,6 +23,9 @@ extern char LogBuffer[2048];
 #define PACKET_SIZE_LIFT_MOTOR 64
 #define PACKET_SIZE_SETTINGS 50
 #define PACKET_SIZE_RUNSTATE 19
+#define PACKET_SIZE_SNSRDBG 20
+
+#define PACKET_SIZE_MINIMUM 55
 
 typedef struct motorLog{
 	uint8_t motorRunning;
@@ -38,6 +42,7 @@ typedef struct LogData{
 	uint8_t logLayerChange;
 	uint8_t logRunStateChange;
 	uint8_t flushBuffer;
+	uint8_t logSensorData;
 }Log;
 
 
@@ -53,6 +58,7 @@ void Log_disableLogging(Log *l);
 void Log_DoOneCycle(void);
 void Log_ResetRunTimeRdngNos(void);
 uint8_t Log_addSettingsDataToBuffer(machineSettingsTypeDef *m,uint16_t bufferLocation);
+uint8_t Log_addSensorDebugDataToBuffer(SensorTypeDef *s,uint16_t bufferLocation);
 void Log_ResetBufferIndex(Log *l);
 
 #endif /* LOG_H_ */

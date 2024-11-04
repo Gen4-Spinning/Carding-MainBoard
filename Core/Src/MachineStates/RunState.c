@@ -108,7 +108,6 @@ void RunState(void){
 					SO_enableCANObservers(&SO,motors1,noOfMotors);
 				}
 				rampOver = 0;
-
 				sensor.ductStateAlignementTimer = 0;
 			}
 		}
@@ -155,6 +154,7 @@ void RunState(void){
 				SO_enableCANObservers(&SO,motors,noOfMotors);
 			}
 			S.runMode = RUN_ALL;
+			S.BT_pauseReason = 0;
 
 			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_ON,AMBER_OFF);
 			TowerLamp_ApplyState(&hmcp,&mcp_portB);
@@ -226,7 +226,6 @@ void RunState(void){
 			S.settingsModified = 0;
 		}
 
-		//read once a sec
 		sensor.ductSensor = Sensor_ReadValueDirectly(&hmcp,&mcp_portB_sensorVal,DUCT_SENSOR);
 		if (sensor.ductCurrentState == DUCT_SENSOR_OPEN){
 			if (sensor.ductSensor  == DUCT_SENSOR_CLOSED){
@@ -241,6 +240,8 @@ void RunState(void){
 						if (response == 1){
 							sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
 							sensor.ductTimerIncrementBool = 0;
+							sensor.ductSensorTimer = 0;
+							sensor.LogductSensorTimerReached = 1;
 							SO_disableCanObserver(&SO,BEATER_FEED);
 						}
 						sensor.ductStateAlignementTimer = 0;
@@ -248,7 +249,15 @@ void RunState(void){
 				}
 			}else{ //might have triggered but not for trunk delay time, so restart the count
 				sensor.ductTimerIncrementBool = 0;
-				sensor.ductCurrentState = DUCT_SENSOR_OPEN;
+				sensor.ductSensorTimer = 0;
+				//check for a wrong state alignment and correct it
+				if (sensor.ductStateAlignementTimer > 5){
+					sensor.ductStateAndBtrMotorAligned = DuctSensor_CompareDuctStateWithBeaterFeedState(&sensor,&R[BEATER_FEED]);
+					if (!sensor.ductStateAndBtrMotorAligned){
+						sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
+						sensor.LogductSensorStateCorrected = 1;
+					}
+				}
 			}
 		}else{ // if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
 			if (sensor.ductSensor  == DUCT_SENSOR_OPEN){
@@ -265,25 +274,33 @@ void RunState(void){
 						if (response == 1){
 							sensor.ductCurrentState = DUCT_SENSOR_OPEN;
 							sensor.ductTimerIncrementBool = 0;
-
+							sensor.ductSensorTimer = 0;
+							sensor.LogductSensorTimerReached = 1;
 							//enable all motors again
 							uint8_t motors1[] = {CARDING_CYLINDER,BEATER_CYLINDER,CARDING_FEED,BEATER_FEED,CAGE,COILER};
 							noOfMotors = 6;
 							SO_enableCANObservers(&SO,motors1,noOfMotors);
-
 						}
 						sensor.ductStateAlignementTimer = 0;
 					}
 				}
 			}else{ //might have triggered but not for trunk delay time, so restart the count
 				sensor.ductTimerIncrementBool = 0;
-				sensor.ductCurrentState = DUCT_SENSOR_CLOSED;
+				sensor.ductSensorTimer = 0;
+				//check for a wrong state alignment and correct it. when we change rpm we wait for a while and then start checking
+				if (sensor.ductStateAlignementTimer > 5){
+					sensor.ductStateAndBtrMotorAligned = DuctSensor_CompareDuctStateWithBeaterFeedState(&sensor,&R[BEATER_FEED]);
+					if (!sensor.ductStateAndBtrMotorAligned){
+						sensor.ductCurrentState = DUCT_SENSOR_OPEN;
+						sensor.LogductSensorStateCorrected = 1;
+					}
+				}
 			}
 		}
 
-		//WE need to check if the motor state and the duct state match, otherwise code gets locked.
-		//check once in 3 seconds only.
-		if (S.runMode == RUN_ALL){
+		//WE need to check if the motor state and the duct state match,
+		//when we pause and resume, we resume all motors, and the duct state/motor state alignment is lost.
+		/*if (S.runMode == RUN_ALL){
 			if (sensor.ductStateAlignementTimer%3 == 0){
 				sensor.ductStateAndBtrMotorAligned = DuctSensor_CompareDuctStateWithBeaterFeedState(&sensor,&R[BEATER_FEED]);
 				if (!sensor.ductStateAndBtrMotorAligned){
@@ -293,9 +310,10 @@ void RunState(void){
 					if (sensor.ductCurrentState == DUCT_SENSOR_CLOSED){
 						sensor.ductCurrentState = DUCT_SENSOR_OPEN;
 					}
+					sensor.LogductSensorStateCorrected = 1;
 				}
 			}
-		}
+		}*/
 
 		//--------ways to go into Error State--------
 
@@ -331,7 +349,7 @@ void RunState(void){
 					response = SendCommands_To_MultipleMotors(motors,noOfMotors,RESUME);
 					// ideally,update the duct state here. but since we dont have time to test leave it.
 					// if you press this, the duct Alignment fn will correct the state.
-
+					sensor.updateBtnPressed +=1;
 				}
 			}else{
 				ChangeState(&S,SETTINGS_STATE);

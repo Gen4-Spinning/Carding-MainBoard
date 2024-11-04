@@ -28,8 +28,10 @@ typedef struct {
 	int8_t ductCurrentState;
 	uint8_t ductTimerIncrementBool;
 	uint8_t ductSensorTimer;
-	uint8_t ductSensorOneShot;
-	uint8_t ductSensorClosedTimer;
+	uint8_t updateBtnPressed;
+	uint8_t ductSensorDbgTimer;
+	uint8_t LogductSensorTimerReached;
+	uint8_t LogductSensorStateCorrected;
 
 	uint16_t ductStateAlignementTimer;
 	uint8_t ductStateAndBtrMotorAligned;

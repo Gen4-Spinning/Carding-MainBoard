@@ -25,6 +25,8 @@
 #include "BT_Machine.h"
 #include "BT_Console.h"
 
+#include "TowerLamp.h"
+
 uint8_t doActivity = 0 ;
 
 uint8_t dbg_Start = 0;
@@ -35,7 +37,7 @@ uint8_t dbg_resume = 0;
 uint8_t response = 0;
 uint8_t stopSMPSNow = 0;
 
-uint8_t motors[] = {CARDING_CYLINDER};
+uint8_t motors[] = {COILER};
 uint8_t noOfMotors = 1;
 
 uint8_t sendBTCmd,btReturn,btCmd = 0;
@@ -46,7 +48,9 @@ uint8_t BT_runDbg = 0;
 uint8_t BTpacketSize = 0;
 uint16_t errSource1 = 0 ;
 
+uint8_t testTowerLamp = 0;
 uint8_t SMPS_on,SMPS_off;
+uint8_t canTest = 0;
 
 extern UART_HandleTypeDef huart1;
 void DebugState(void){
@@ -81,6 +85,12 @@ void DebugState(void){
 		if (dbg_stop){
 			response = SendCommands_To_MultipleMotors(motors,noOfMotors,EMERGENCY_STOP);
 			dbg_stop = 0;
+		}
+
+
+		if (canTest){
+			SendCommands_To_MultipleMotors(motors,noOfMotors,START);
+			HAL_Delay(1000);
 		}
 
 		//BT command mode commands
@@ -124,6 +134,28 @@ void DebugState(void){
 			break;
 		}
 
+
+		if (testTowerLamp){
+			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_OFF,AMBER_ON);
+			TowerLamp_ApplyState(&hmcp,&mcp_portB);
+			HAL_Delay(1000);
+
+			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_ON,AMBER_OFF);
+			TowerLamp_ApplyState(&hmcp,&mcp_portB);
+			HAL_Delay(1000);
+
+			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_ON,GREEN_OFF,AMBER_OFF);
+			TowerLamp_ApplyState(&hmcp,&mcp_portB);
+			HAL_Delay(1000);
+
+			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_ON,RED_ON,GREEN_ON,AMBER_ON);
+			TowerLamp_ApplyState(&hmcp,&mcp_portB);
+			HAL_Delay(1000);
+
+			TowerLamp_SetState(&hmcp, &mcp_portB,BUZZER_OFF,RED_OFF,GREEN_OFF,AMBER_OFF);
+			TowerLamp_ApplyState(&hmcp,&mcp_portB);
+			HAL_Delay(1000);
+		}
 
 	}//closes while
 

@@ -113,6 +113,10 @@ char BufferRec[150];
 char BufferTransmit[150] ;// Buffer for Transmit
 char LogBuffer[2048];
 
+
+
+
+
 int ductStateDbg = -1;
 /* USER CODE END PV */
 
@@ -180,6 +184,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 
   if(htim == &htim7){ //100ms timer for state sending to BT
+	  L.logSensorData = 1;
 	  timer7Count ++;
 	  if (timer7Count % 5 == 0){
 		  S.BT_sendState = 1;
@@ -187,12 +192,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			  mcParams.currentMtrsRun += msp.delivery_mMin/60.0 * 0.5;
 		  }
 	  }
+
 	  if (timer7Count == 10){
 		  S.oneSecTimer++;
 		  timer7Count = 0;
 		  Toggle_State_LEDs(&S);
 
 		  sensor.ductStateAlignementTimer++;
+		  sensor.ductSensorDbgTimer++;
 		  if (sensor.ductTimerIncrementBool){
 			  sensor.ductSensorTimer++;
 		  }
@@ -384,6 +391,7 @@ int main(void)
   SMPS_Init();
   HAL_Delay(1000);//contactor takes a long time to turn on.
   S.SMPS_cntrl = SMPS_TURNEDON;
+
 
   /* USER CODE END 2 */
 
